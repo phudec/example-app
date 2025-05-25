@@ -18,246 +18,192 @@ All APIs except the Multitenancy API, are protected using API-KEY Token, which h
 Comments, Blog and Images APIs are also protected using the Access Token acquired from the `/login` EndPoint. Access Token MUST be sent like so `Authorization: my-access-token` in the HTTP header.
  * OpenAPI spec version: 1.0.0
  */
-import type {
-  AccessToken,
-  Article,
-  ArticleDetail,
-  Comment,
-  ImageInfo,
-  ListArticlesParams,
-  PostImagesBody,
-  PostLoginBody,
-  Tenant
-} from './models';
+import axios from 'axios'
+import type { AxiosRequestConfig, AxiosResponse } from 'axios'
 
-import { customAxiosInstance } from './client/client';
+import type {
+    AccessToken,
+    Article,
+    ArticleDetail,
+    Comment,
+    ImageInfo,
+    ListArticlesParams,
+    PostImagesBody,
+    PostLoginBody,
+    Tenant,
+} from './models'
 
 // https://stackoverflow.com/questions/49579094/typescript-conditional-types-filter-out-readonly-properties-pick-only-requir/49579497#49579497
-type IfEquals<X, Y, A = X, B = never> = (<T>() => T extends X ? 1 : 2) extends <
-T,
->() => T extends Y ? 1 : 2
-? A
-: B;
+type IfEquals<X, Y, A = X, B = never> = (<T>() => T extends X ? 1 : 2) extends <T>() => T extends Y ? 1 : 2 ? A : B
 
 type WritableKeys<T> = {
-[P in keyof T]-?: IfEquals<
-  { [Q in P]: T[P] },
-  { -readonly [Q in P]: T[P] },
-  P
->;
-}[keyof T];
+    [P in keyof T]-?: IfEquals<{ [Q in P]: T[P] }, { -readonly [Q in P]: T[P] }, P>
+}[keyof T]
 
-type UnionToIntersection<U> =
-  (U extends any ? (k: U)=>void : never) extends ((k: infer I)=>void) ? I : never;
-type DistributeReadOnlyOverUnions<T> = T extends any ? NonReadonly<T> : never;
+type UnionToIntersection<U> = (U extends any ? (k: U) => void : never) extends (k: infer I) => void ? I : never
+type DistributeReadOnlyOverUnions<T> = T extends any ? NonReadonly<T> : never
 
-type Writable<T> = Pick<T, WritableKeys<T>>;
-type NonReadonly<T> = [T] extends [UnionToIntersection<T>] ? {
-  [P in keyof Writable<T>]: T[P] extends object
-    ? NonReadonly<NonNullable<T[P]>>
-    : T[P];
-} : DistributeReadOnlyOverUnions<T>;
+type Writable<T> = Pick<T, WritableKeys<T>>
+type NonReadonly<T> = [T] extends [UnionToIntersection<T>]
+    ? {
+          [P in keyof Writable<T>]: T[P] extends object ? NonReadonly<NonNullable<T[P]>> : T[P]
+      }
+    : DistributeReadOnlyOverUnions<T>
 
-type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
-
-
-  /**
+/**
  * @summary Sign in into the application
  */
-export const postLogin = (
+export const postLogin = <TData = AxiosResponse<AccessToken>>(
     postLoginBody: PostLoginBody,
- options?: SecondParameter<typeof customAxiosInstance>,) => {
-      return customAxiosInstance<AccessToken>(
-      {url: `/login`, method: 'POST',
-      headers: {'Content-Type': 'application/json', },
-      data: postLoginBody
-    },
-      options);
-    }
-  
+    options?: AxiosRequestConfig
+): Promise<TData> => {
+    return axios.post(`/login`, postLoginBody, options)
+}
+
 /**
  * @summary List of all articles
  */
-export const listArticles = (
+export const listArticles = <TData = AxiosResponse<Article[]>>(
     params?: ListArticlesParams,
- options?: SecondParameter<typeof customAxiosInstance>,) => {
-      return customAxiosInstance<Article[]>(
-      {url: `/articles`, method: 'GET',
-        params
-    },
-      options);
-    }
-  
+    options?: AxiosRequestConfig
+): Promise<TData> => {
+    return axios.get(`/articles`, {
+        ...options,
+        params: { ...params, ...options?.params },
+    })
+}
+
 /**
  * @summary Create an article
  */
-export const createArticle = (
+export const createArticle = <TData = AxiosResponse<ArticleDetail>>(
     articleDetail: NonReadonly<ArticleDetail>,
- options?: SecondParameter<typeof customAxiosInstance>,) => {
-      return customAxiosInstance<ArticleDetail>(
-      {url: `/articles`, method: 'POST',
-      headers: {'Content-Type': 'application/json', },
-      data: articleDetail
-    },
-      options);
-    }
-  
+    options?: AxiosRequestConfig
+): Promise<TData> => {
+    return axios.post(`/articles`, articleDetail, options)
+}
+
 /**
  * @summary Article detail with content and comments
  */
-export const getArticle = (
+export const getArticle = <TData = AxiosResponse<ArticleDetail>>(
     articleId: string,
- options?: SecondParameter<typeof customAxiosInstance>,) => {
-      return customAxiosInstance<ArticleDetail>(
-      {url: `/articles/${articleId}`, method: 'GET'
-    },
-      options);
-    }
-  
+    options?: AxiosRequestConfig
+): Promise<TData> => {
+    return axios.get(`/articles/${articleId}`, options)
+}
+
 /**
  * @summary Update article detail
  */
-export const updateArticle = (
+export const updateArticle = <TData = AxiosResponse<ArticleDetail>>(
     articleId: string,
     articleDetail: NonReadonly<ArticleDetail>,
- options?: SecondParameter<typeof customAxiosInstance>,) => {
-      return customAxiosInstance<ArticleDetail>(
-      {url: `/articles/${articleId}`, method: 'PATCH',
-      headers: {'Content-Type': 'application/json', },
-      data: articleDetail
-    },
-      options);
-    }
-  
+    options?: AxiosRequestConfig
+): Promise<TData> => {
+    return axios.patch(`/articles/${articleId}`, articleDetail, options)
+}
+
 /**
  * @summary Delete article
  */
-export const deleteArticle = (
-    articleId: string,
- options?: SecondParameter<typeof customAxiosInstance>,) => {
-      return customAxiosInstance<void>(
-      {url: `/articles/${articleId}`, method: 'DELETE'
-    },
-      options);
-    }
-  
+export const deleteArticle = <TData = AxiosResponse<void>>(articleId: string, options?: AxiosRequestConfig): Promise<TData> => {
+    return axios.delete(`/articles/${articleId}`, options)
+}
+
 /**
  * @summary Create comment
  */
-export const postComments = (
+export const postComments = <TData = AxiosResponse<Comment>>(
     comment: NonReadonly<Comment>,
- options?: SecondParameter<typeof customAxiosInstance>,) => {
-      return customAxiosInstance<Comment>(
-      {url: `/comments`, method: 'POST',
-      headers: {'Content-Type': 'application/json', },
-      data: comment
-    },
-      options);
-    }
-  
+    options?: AxiosRequestConfig
+): Promise<TData> => {
+    return axios.post(`/comments`, comment, options)
+}
+
 /**
  * @summary Upvote comment
  */
-export const postCommentsCommentIdVoteUp = (
+export const postCommentsCommentIdVoteUp = <TData = AxiosResponse<Comment>>(
     commentId: string,
- options?: SecondParameter<typeof customAxiosInstance>,) => {
-      return customAxiosInstance<Comment>(
-      {url: `/comments/${commentId}/vote/up`, method: 'POST'
-    },
-      options);
-    }
-  
+    options?: AxiosRequestConfig
+): Promise<TData> => {
+    return axios.post(`/comments/${commentId}/vote/up`, undefined, options)
+}
+
 /**
  * @summary Downvote comment
  */
-export const postCommentsCommentIdVoteDown = (
+export const postCommentsCommentIdVoteDown = <TData = AxiosResponse<Comment>>(
     commentId: string,
- options?: SecondParameter<typeof customAxiosInstance>,) => {
-      return customAxiosInstance<Comment>(
-      {url: `/comments/${commentId}/vote/down`, method: 'POST'
-    },
-      options);
-    }
-  
+    options?: AxiosRequestConfig
+): Promise<TData> => {
+    return axios.post(`/comments/${commentId}/vote/down`, undefined, options)
+}
+
 /**
  * @summary Upload an image
  */
-export const postImages = (
+export const postImages = <TData = AxiosResponse<ImageInfo[]>>(
     postImagesBody: PostImagesBody,
- options?: SecondParameter<typeof customAxiosInstance>,) => {const formData = new FormData();
-if(postImagesBody.image !== undefined) {
- postImagesBody.image.forEach(value => formData.append(`image`, value));
- }
-
-      return customAxiosInstance<ImageInfo[]>(
-      {url: `/images`, method: 'POST',
-      headers: {'Content-Type': 'multipart/form-data', },
-       data: formData
-    },
-      options);
+    options?: AxiosRequestConfig
+): Promise<TData> => {
+    const formData = new FormData()
+    if (postImagesBody.image !== undefined) {
+        postImagesBody.image.forEach((value) => formData.append(`image`, value))
     }
-  
+
+    return axios.post(`/images`, formData, options)
+}
+
 /**
  * @summary Download image
  */
-export const getImagesImageId = (
-    imageId: string,
- options?: SecondParameter<typeof customAxiosInstance>,) => {
-      return customAxiosInstance<void>(
-      {url: `/images/${imageId}`, method: 'GET'
-    },
-      options);
-    }
-  
+export const getImagesImageId = <TData = AxiosResponse<void>>(imageId: string, options?: AxiosRequestConfig): Promise<TData> => {
+    return axios.get(`/images/${imageId}`, options)
+}
+
 /**
  * @summary Delete image
  */
-export const deleteImagesImageId = (
+export const deleteImagesImageId = <TData = AxiosResponse<void>>(
     imageId: string,
- options?: SecondParameter<typeof customAxiosInstance>,) => {
-      return customAxiosInstance<void>(
-      {url: `/images/${imageId}`, method: 'DELETE'
-    },
-      options);
-    }
-  
+    options?: AxiosRequestConfig
+): Promise<TData> => {
+    return axios.delete(`/images/${imageId}`, options)
+}
+
 /**
  * @summary Create tenant
  */
-export const postTenants = (
+export const postTenants = <TData = AxiosResponse<Tenant>>(
     tenant: NonReadonly<Tenant>,
- options?: SecondParameter<typeof customAxiosInstance>,) => {
-      return customAxiosInstance<Tenant>(
-      {url: `/tenants`, method: 'POST',
-      headers: {'Content-Type': 'application/json', },
-      data: tenant
-    },
-      options);
-    }
-  
+    options?: AxiosRequestConfig
+): Promise<TData> => {
+    return axios.post(`/tenants`, tenant, options)
+}
+
 /**
  * @summary Info for a specific tenant
  */
-export const getTenantsTenantId = (
+export const getTenantsTenantId = <TData = AxiosResponse<Tenant>>(
     tenantId: string,
- options?: SecondParameter<typeof customAxiosInstance>,) => {
-      return customAxiosInstance<Tenant>(
-      {url: `/tenants/${tenantId}`, method: 'GET'
-    },
-      options);
-    }
-  
-export type PostLoginResult = NonNullable<Awaited<ReturnType<typeof postLogin>>>
-export type ListArticlesResult = NonNullable<Awaited<ReturnType<typeof listArticles>>>
-export type CreateArticleResult = NonNullable<Awaited<ReturnType<typeof createArticle>>>
-export type GetArticleResult = NonNullable<Awaited<ReturnType<typeof getArticle>>>
-export type UpdateArticleResult = NonNullable<Awaited<ReturnType<typeof updateArticle>>>
-export type DeleteArticleResult = NonNullable<Awaited<ReturnType<typeof deleteArticle>>>
-export type PostCommentsResult = NonNullable<Awaited<ReturnType<typeof postComments>>>
-export type PostCommentsCommentIdVoteUpResult = NonNullable<Awaited<ReturnType<typeof postCommentsCommentIdVoteUp>>>
-export type PostCommentsCommentIdVoteDownResult = NonNullable<Awaited<ReturnType<typeof postCommentsCommentIdVoteDown>>>
-export type PostImagesResult = NonNullable<Awaited<ReturnType<typeof postImages>>>
-export type GetImagesImageIdResult = NonNullable<Awaited<ReturnType<typeof getImagesImageId>>>
-export type DeleteImagesImageIdResult = NonNullable<Awaited<ReturnType<typeof deleteImagesImageId>>>
-export type PostTenantsResult = NonNullable<Awaited<ReturnType<typeof postTenants>>>
-export type GetTenantsTenantIdResult = NonNullable<Awaited<ReturnType<typeof getTenantsTenantId>>>
+    options?: AxiosRequestConfig
+): Promise<TData> => {
+    return axios.get(`/tenants/${tenantId}`, options)
+}
+
+export type PostLoginResult = AxiosResponse<AccessToken>
+export type ListArticlesResult = AxiosResponse<Article[]>
+export type CreateArticleResult = AxiosResponse<ArticleDetail>
+export type GetArticleResult = AxiosResponse<ArticleDetail>
+export type UpdateArticleResult = AxiosResponse<ArticleDetail>
+export type DeleteArticleResult = AxiosResponse<void>
+export type PostCommentsResult = AxiosResponse<Comment>
+export type PostCommentsCommentIdVoteUpResult = AxiosResponse<Comment>
+export type PostCommentsCommentIdVoteDownResult = AxiosResponse<Comment>
+export type PostImagesResult = AxiosResponse<ImageInfo[]>
+export type GetImagesImageIdResult = AxiosResponse<void>
+export type DeleteImagesImageIdResult = AxiosResponse<void>
+export type PostTenantsResult = AxiosResponse<Tenant>
+export type GetTenantsTenantIdResult = AxiosResponse<Tenant>

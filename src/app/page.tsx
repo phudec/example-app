@@ -1,5 +1,5 @@
 const Articles = () => {
-    return <div>Recent Articles</div>
+    return <div>Test</div>
 }
 
 export default Articles
