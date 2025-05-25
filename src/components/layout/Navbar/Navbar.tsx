@@ -5,6 +5,9 @@ import Image from 'next/image'
 import { useAppDispatch, useAppSelector } from '@/redux/hooks'
 import { useRef, useState } from 'react'
 import { logOut } from '@/redux/slices/authSlice'
+import ExpandLessIcon from '@mui/icons-material/ExpandLess'
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
+import AccountCircleIcon from '@mui/icons-material/AccountCircle'
 
 export const Navbar = () => {
     const [isOpen, setIsOpen] = useState<boolean>(false)
@@ -45,14 +48,13 @@ export const Navbar = () => {
                                 <Button LinkComponent={Link} href='/create-article'>
                                     Create Article
                                 </Button>
-                                <Box>
+                                <Box marginLeft={2}>
                                     <Button
-                                        sx={{ height: 40 }}
                                         onClick={handleMenu}
                                         ref={anchorEl}
-                                        // endIcon={anchorEl ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+                                        endIcon={isOpen ? <ExpandLessIcon /> : <ExpandMoreIcon />}
                                     >
-                                        test
+                                        <AccountCircleIcon />
                                     </Button>
                                     <Menu
                                         id='menu-appbar'

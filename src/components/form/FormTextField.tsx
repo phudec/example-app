@@ -4,7 +4,7 @@ import { TextField, TextFieldProps } from '@mui/material'
 type FormTextFieldProps<
     TFieldValues extends FieldValues = FieldValues,
     TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
-> = TextFieldProps & Pick<ControllerProps<TFieldValues, TName>, 'name' | 'control'>
+> = TextFieldProps & Required<Pick<ControllerProps<TFieldValues, TName>, 'name' | 'control'>>
 
 export const FormTextField = <
     TFieldValues extends FieldValues = FieldValues,

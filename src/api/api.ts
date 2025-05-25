@@ -33,33 +33,6 @@ import type {
     Tenant,
 } from './models'
 
-// https://stackoverflow.com/questions/49579094/typescript-conditional-types-filter-out-readonly-properties-pick-only-requir/49579497#49579497
-type IfEquals<X, Y, A = X, B = never> = (<T>() => T extends X ? 1 : 2) extends <T>() => T extends Y ? 1 : 2 ? A : B
-
-type WritableKeys<T> = {
-    [P in keyof T]-?: IfEquals<{ [Q in P]: T[P] }, { -readonly [Q in P]: T[P] }, P>
-}[keyof T]
-
-type UnionToIntersection<U> = (U extends any ? (k: U) => void : never) extends (k: infer I) => void ? I : never
-type DistributeReadOnlyOverUnions<T> = T extends any ? NonReadonly<T> : never
-
-type Writable<T> = Pick<T, WritableKeys<T>>
-type NonReadonly<T> = [T] extends [UnionToIntersection<T>]
-    ? {
-          [P in keyof Writable<T>]: T[P] extends object ? NonReadonly<NonNullable<T[P]>> : T[P]
-      }
-    : DistributeReadOnlyOverUnions<T>
-
-/**
- * @summary Sign in into the application
- */
-export const postLogin = <TData = AxiosResponse<AccessToken>>(
-    postLoginBody: PostLoginBody,
-    options?: AxiosRequestConfig
-): Promise<TData> => {
-    return axios.post(`/login`, postLoginBody, options)
-}
-
 /**
  * @summary List of all articles
  */
@@ -72,17 +45,6 @@ export const listArticles = <TData = AxiosResponse<Article[]>>(
         params: { ...params, ...options?.params },
     })
 }
-
-/**
- * @summary Create an article
- */
-export const createArticle = <TData = AxiosResponse<ArticleDetail>>(
-    articleDetail: NonReadonly<ArticleDetail>,
-    options?: AxiosRequestConfig
-): Promise<TData> => {
-    return axios.post(`/articles`, articleDetail, options)
-}
-
 /**
  * @summary Article detail with content and comments
  */
@@ -94,96 +56,6 @@ export const getArticle = <TData = AxiosResponse<ArticleDetail>>(
 }
 
 /**
- * @summary Update article detail
- */
-export const updateArticle = <TData = AxiosResponse<ArticleDetail>>(
-    articleId: string,
-    articleDetail: NonReadonly<ArticleDetail>,
-    options?: AxiosRequestConfig
-): Promise<TData> => {
-    return axios.patch(`/articles/${articleId}`, articleDetail, options)
-}
-
-/**
- * @summary Delete article
- */
-export const deleteArticle = <TData = AxiosResponse<void>>(articleId: string, options?: AxiosRequestConfig): Promise<TData> => {
-    return axios.delete(`/articles/${articleId}`, options)
-}
-
-/**
- * @summary Create comment
- */
-export const postComments = <TData = AxiosResponse<Comment>>(
-    comment: NonReadonly<Comment>,
-    options?: AxiosRequestConfig
-): Promise<TData> => {
-    return axios.post(`/comments`, comment, options)
-}
-
-/**
- * @summary Upvote comment
- */
-export const postCommentsCommentIdVoteUp = <TData = AxiosResponse<Comment>>(
-    commentId: string,
-    options?: AxiosRequestConfig
-): Promise<TData> => {
-    return axios.post(`/comments/${commentId}/vote/up`, undefined, options)
-}
-
-/**
- * @summary Downvote comment
- */
-export const postCommentsCommentIdVoteDown = <TData = AxiosResponse<Comment>>(
-    commentId: string,
-    options?: AxiosRequestConfig
-): Promise<TData> => {
-    return axios.post(`/comments/${commentId}/vote/down`, undefined, options)
-}
-
-/**
- * @summary Upload an image
- */
-export const postImages = <TData = AxiosResponse<ImageInfo[]>>(
-    postImagesBody: PostImagesBody,
-    options?: AxiosRequestConfig
-): Promise<TData> => {
-    const formData = new FormData()
-    if (postImagesBody.image !== undefined) {
-        postImagesBody.image.forEach((value) => formData.append(`image`, value))
-    }
-
-    return axios.post(`/images`, formData, options)
-}
-
-/**
- * @summary Download image
- */
-export const getImagesImageId = <TData = AxiosResponse<void>>(imageId: string, options?: AxiosRequestConfig): Promise<TData> => {
-    return axios.get(`/images/${imageId}`, options)
-}
-
-/**
- * @summary Delete image
- */
-export const deleteImagesImageId = <TData = AxiosResponse<void>>(
-    imageId: string,
-    options?: AxiosRequestConfig
-): Promise<TData> => {
-    return axios.delete(`/images/${imageId}`, options)
-}
-
-/**
- * @summary Create tenant
- */
-export const postTenants = <TData = AxiosResponse<Tenant>>(
-    tenant: NonReadonly<Tenant>,
-    options?: AxiosRequestConfig
-): Promise<TData> => {
-    return axios.post(`/tenants`, tenant, options)
-}
-
-/**
  * @summary Info for a specific tenant
  */
 export const getTenantsTenantId = <TData = AxiosResponse<Tenant>>(
@@ -192,18 +64,3 @@ export const getTenantsTenantId = <TData = AxiosResponse<Tenant>>(
 ): Promise<TData> => {
     return axios.get(`/tenants/${tenantId}`, options)
 }
-
-export type PostLoginResult = AxiosResponse<AccessToken>
-export type ListArticlesResult = AxiosResponse<Article[]>
-export type CreateArticleResult = AxiosResponse<ArticleDetail>
-export type GetArticleResult = AxiosResponse<ArticleDetail>
-export type UpdateArticleResult = AxiosResponse<ArticleDetail>
-export type DeleteArticleResult = AxiosResponse<void>
-export type PostCommentsResult = AxiosResponse<Comment>
-export type PostCommentsCommentIdVoteUpResult = AxiosResponse<Comment>
-export type PostCommentsCommentIdVoteDownResult = AxiosResponse<Comment>
-export type PostImagesResult = AxiosResponse<ImageInfo[]>
-export type GetImagesImageIdResult = AxiosResponse<void>
-export type DeleteImagesImageIdResult = AxiosResponse<void>
-export type PostTenantsResult = AxiosResponse<Tenant>
-export type GetTenantsTenantIdResult = AxiosResponse<Tenant>
