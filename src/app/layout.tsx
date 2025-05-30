@@ -11,7 +11,7 @@ type RootLayoutProps = {
 
 const RootLayout = ({ children }: RootLayoutProps) => {
     return (
-        <html lang='en' suppressHydrationWarning>
+        <html lang='en'>
             <body>
                 <AppRouterCacheProvider>
                     <ThemeProvider theme={theme}>

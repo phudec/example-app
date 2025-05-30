@@ -7,7 +7,7 @@ export const Layout = ({ children }: LayoutProps) => {
     return (
         <Stack height='100vh' width='100vw'>
             <Navbar />
-            <Container sx={{ height: '100%' }}>{children}</Container>
+            <Container sx={{ height: '100%', padding: 3 }}>{children}</Container>
         </Stack>
     )
 }

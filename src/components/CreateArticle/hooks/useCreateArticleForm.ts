@@ -6,6 +6,7 @@ import { CreateArticleForm, useCreateArticleFormProps } from '../types'
 const validationSchema = z.object({
     title: z.string().min(1),
     content: z.string().min(1),
+    image: z.instanceof(File).nullable(),
 })
 
 export const useCreateArticleForm = (): useCreateArticleFormProps => {
@@ -13,6 +14,6 @@ export const useCreateArticleForm = (): useCreateArticleFormProps => {
         mode: 'onSubmit',
         reValidateMode: 'onChange',
         resolver: zodResolver(validationSchema),
-        defaultValues: { title: '', content: '' },
+        defaultValues: { title: '', content: '', image: null },
     })
 }
